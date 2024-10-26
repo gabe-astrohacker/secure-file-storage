@@ -40,7 +40,7 @@ class MainPage:
         file_box["font"] = ft
         file_box["fg"] = "#333333"
         file_box["justify"] = "left"
-        file_box.place(x=170, y=180, height=len(self.my_list) * 20)
+        file_box.place(x=170, y=180, width=411, height=len(self.my_list) * 22.5)
 
         download_button = tk.Button(self.root)
         download_button["text"] = "Download"
@@ -48,7 +48,7 @@ class MainPage:
         ft = tkFont.Font(family='Readex Pro', size=10)
         download_button["font"] = ft
         download_button["fg"] = "#000000"
-        download_button["justify"] = "centre"
+        download_button["justify"] = "center"
         download_button.place(x=170, y=130, width=88, height=25)
         download_button["command"] = lambda: self.download(file_box.curselection())
 
@@ -58,7 +58,7 @@ class MainPage:
         ft = tkFont.Font(family='Readex Pro', size=10)
         upload_button["font"] = ft
         upload_button["fg"] = "#000000"
-        upload_button["justify"] = "centre"
+        upload_button["justify"] = "center"
         upload_button.place(x=490, y=130, width=88, height=25)
         upload_button["command"] = self.upload
 
@@ -74,7 +74,7 @@ class MainPage:
             file_status_label["justify"] = "left"
             file_status_label["fg"] = "#0000FF"
             file_status_label["text"] = "Please click on a file to download it"
-            file_status_label.place(x=60, y=(len(self.my_list) * 21 + 180), width=400, height=25)
+            file_status_label.place(x=60, y=(len(self.my_list) * 22.5 + 180), width=400, height=25)
 
         else:
             file = self.my_list[index[0]]
@@ -86,7 +86,7 @@ class MainPage:
             file_status_label["justify"] = "left"
             file_status_label["fg"] = "#0000FF"
             file_status_label["text"] = f"{file} ahs been downloaded"
-            file_status_label.place(x=60, y=(len(self.my_list) * 21 + 180), width=400, height=25)
+            file_status_label.place(x=60, y=(len(self.my_list) * 22.5 + 180), width=400, height=25)
 
 
     def upload(self):
@@ -103,4 +103,5 @@ class MainPage:
 
 if __name__ == '__main__':
     root = tk.Tk()
-    app = MainPage(root, "", "")
+    app = MainPage(root, "", ["No files have been uploaded yet."])
+    root.mainloop()

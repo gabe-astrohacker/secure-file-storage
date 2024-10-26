@@ -1,17 +1,16 @@
 import tkinter as tk
 import tkinter.font as tkFont
-from multiprocessing.resource_tracker import register
 
-# from client import Client
+from Client import Client
 from RegisterPage import RegisterPage
 from MainPage import MainPage
 
 
-class LogInPage():
+class LogInPage:
     def __init__(self, root):
         self.root = root
 
-        # self.client = Client()
+        self.client = Client()
 
         self.gui()
 
@@ -95,9 +94,9 @@ class LogInPage():
 
 
     def log_in(self, username, password):
-        # auth = self.client.log_in(username, password)
+        auth = self.client.log_in(username, password)
 
-        if "Invalid" in "Invali": # auth[0]:
+        if "Invalid" in auth[0]:
             inv_log_in_label = tk.Label(self.root)
             ft = tkFont.Font(family='Readex Pro', size=10)
             inv_log_in_label["font"] = ft
@@ -110,7 +109,7 @@ class LogInPage():
             self.root.destroy()
 
             main_root = tk.Tk()
-            main_app = MainPage(main_root, "", [""]) # self.client, auth[1])
+            main_app = MainPage(main_root, self.client, auth[1])
             main_root.mainloop()
 
 
@@ -118,7 +117,7 @@ class LogInPage():
         self.root.destroy()
 
         reg_root = tk.Tk()
-        reg_gui = RegisterPage(reg_root, "") # self.client)
+        reg_gui = RegisterPage(reg_root, self.client)
         reg_root.mainloop()
 
         self.root = tk.Tk()

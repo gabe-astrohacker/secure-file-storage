@@ -1,7 +1,7 @@
 import socket
 import os
 
-# from encryption import Encryption
+from Encryption import Encryption
 
 
 class Client:
@@ -79,8 +79,8 @@ class Client:
         with open(key_file, "wb") as file:
             file.write(key_data)
 
-        # download_file = Encryption((plain_file, key_file), plain_file)
-        # download_file.decrypt()
+        download_file = Encryption((plain_file, key_file), plain_file)
+        download_file.decrypt()
 
         os.remove(key_file)
 
@@ -105,8 +105,8 @@ class Client:
         else:
             to_enc_addr = file_addr
 
-        # upload_file = Encryption(plain_file, to_enc_addr)
-        # upload_file.encrypt()
+        upload_file = Encryption(plain_file, to_enc_addr)
+        upload_file.encrypt()
 
         key_addr = to_enc_addr[:-4] + "_key" + to_enc_addr[-4:]
 

@@ -4,7 +4,7 @@ import secrets
 class Encryption:
     def __init__(self, file_in, file_out):
         if type(file_in) == tuple:
-            self.file_in, self.key_file = file_in[0]
+            self.file_in, self.key_file = file_in
         elif type(file_in) == str:
             self.file_in = file_in
 
@@ -52,7 +52,4 @@ class Encryption:
 
     def decrypt_vernam(self):
         self.plain_data = bytes([a ^ b for (a, b) in zip(self.cypher_data, self.key)])
-
-
-
 

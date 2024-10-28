@@ -85,7 +85,7 @@ class MainPage:
             file_status_label["font"] = ft
             file_status_label["justify"] = "left"
             file_status_label["fg"] = "#0000FF"
-            file_status_label["text"] = f"{file} ahs been downloaded"
+            file_status_label["text"] = f"{file} has been downloaded"
             file_status_label.place(x=60, y=(len(self.my_list) * 22.5 + 180), width=400, height=25)
 
 

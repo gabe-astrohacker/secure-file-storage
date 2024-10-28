@@ -1,6 +1,7 @@
 import socket
 import threading
-# from database import DB
+
+from Database import DB
 import os
 
 
@@ -43,14 +44,13 @@ class Server:
 
         while client_request != self.DISCONNECT_MESSAGE:
             if client_request == "!LOG IN":
-                print("Log in has started.")
                 self.authentication(user)
                 if self.auth:
                     user_files = ""
-                    for a_file in os.listdir(f"D:\\Programming Project\\{user.username}"):
+                    for a_file in os.listdir(f"server_folder/{user.username}"):
                         user_files += a_file + " "
 
-                    if user_files != "":
+                    if user_files == "":
                         user_files = "None"
                     elif user_files[-1] == " ":
                         user_files = user_files[:-1]
@@ -58,21 +58,18 @@ class Server:
                     user.conn.send(user_files.encode(self.FORMAT))
 
             elif client_request == "!SIGN UP":
-                print("Sign up has started.")
 
                 self.create_account(user)
 
             elif self.auth:
                 if client_request == "!UPLOAD":
-                    print("Upload has started.")
                     self.upload(user)
 
                 elif client_request == "!DOWNLOAD":
-                    print("Download has started.")
                     self.download(user)
 
-            else:
-                user.conn.send("Error. Invalid request.".encode(self.FORMAT))
+                else:
+                    user.conn.send("Error. Invalid request.".encode(self.FORMAT))
 
             client_request = self.receive(user)
 
@@ -83,15 +80,15 @@ class Server:
     def receive(self, user, msg="Message Received."):
         request = user.conn.recv(2048).decode(self.FORMAT)
         print(f"[{user.addr}] {request}")
-        user.conn.send(request.encode(self.FORMAT))
+        user.conn.send(msg.encode(self.FORMAT))
         return request
 
 
     def authentication(self, user):
         user.username, user.password = self.receive(user, msg="").split(", ")
 
-        # db = DB()
-        # self.auth = db.check_user(user.username, user.password)
+        db = DB()
+        self.auth = db.check_user(user.username, user.password)
 
         if self.auth:
             user.conn.send("Authentication successful.".encode(self.FORMAT))
@@ -102,38 +99,38 @@ class Server:
     def create_account(self, user):
         user.username, user.password = self.receive(user, msg="").split(", ")
 
-        # db = DB()
-        sign_up = True # db.new_user(user.username, user.password)
+        db = DB()
+        sign_up = db.new_user(user.username, user.password)
 
         if sign_up:
             user.conn.send("User created successfully".encode(self.FORMAT))
-            os.makedirs(f"D:\\Programming Project\\{user.username}")
+            os.makedirs(f"server_folder/{user.username}")
         else:
             user.conn.send("Username already in use. Try again.".encode(self.FORMAT))
 
 
     def upload(self, user):
         file_name = self.receive(user)
-        file_data = user.conn.recv(131072).decode(self.FORMAT)
-        key_data = user.conn.recv(131072).decode(self.FORMAT)
+        file_data = user.conn.recv(131072)
+        key_data = user.conn.recv(131072)
 
         user.conn.send("Msg received".encode(self.FORMAT))
 
-        # db = DB()
-        # db.new_file(user.username, file_name, key_data)
+        db = DB()
+        db.new_file(user.username, file_name, key_data)
 
-        with open(f"D:\\Programming Project\\{user.username}\\{file_name}", "wb") as file:
+        with open(f"server_folder/{user.username}/{file_name}", "wb") as file:
             file.write(file_data)
 
 
     def download(self, user):
         file_name = self.receive(user, msg="")
 
-        with open(f"D:\\Programming Project\\{user.username}\\{file_name}", "rb") as file:
+        with open(f"server_folder/{user.username}/{file_name}", "rb") as file:
             data = file.read()
 
-        # db = DB()
-        key = "" # db.get_key(user.username, file_name)
+        db = DB()
+        key = db.get_key(user.username, file_name)
         user.conn.send(data)
         user.conn.send(key)
 

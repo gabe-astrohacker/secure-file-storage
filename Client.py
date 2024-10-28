@@ -7,7 +7,7 @@ from Encryption import Encryption
 class Client:
     def __init__(self):
         self.PORT = 5050
-        self.SERVER = "127.0.0.1"
+        self.SERVER = "192.168.1.151"
         self.ADDR = (self.SERVER, self.PORT)
         self.FORMAT = 'utf-8'
         self.DISCONNECT_MESSAGE = "!DISCONNECT"
@@ -110,15 +110,15 @@ class Client:
 
         key_addr = to_enc_addr[:-4] + "_key" + to_enc_addr[-4:]
 
-        with open(plain_file, "rb") as file:
+        with open(to_enc_addr, "rb") as file:
             file_data = file.read()
 
         with open(key_addr, "rb") as file:
             key_data = file.read()
 
         self.send(file_addr)
-        self.send(file_data)
-        self.send(key_data)
+        self.client.send(file_data)
+        self.client.send(key_data)
 
         self.reply = self.client.recv(1024).decode(self.FORMAT)
         print(self.reply + "\n\n")
@@ -134,8 +134,7 @@ class Client:
 
 
     def send(self, message):
-        message = message.encode(self.FORMAT)
-        self.client.send(message)
+        self.client.send(message.encode(self.FORMAT))
         self.reply = self.client.recv(1024).decode(self.FORMAT)
         print(self.reply + "\n\n")
 

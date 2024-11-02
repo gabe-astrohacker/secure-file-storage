@@ -1,5 +1,5 @@
 import tkinter as tk
-import tkinter.font as tkFont
+import tkinter.font as tk_font
 
 from Client import Client
 from RegisterPage import RegisterPage
@@ -26,15 +26,16 @@ class LogInPage:
         self.root.resizable(width=False, height=False)
 
         log_in_label = tk.Label(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=17)
+        ft = tk_font.Font(family='Readex Pro', size=17)
         log_in_label["font"] = ft
         log_in_label["fg"] = "#333333"
         log_in_label["justify"] = "center"
         log_in_label["text"] = "Log In"
         log_in_label.place(x=90, y=50, width=477, height=30)
 
+        ft = tk_font.Font(family='Readex Pro', size=9)
+
         username_label = tk.Label(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=9)
         username_label["font"] = ft
         username_label["fg"] = "#333333"
         username_label["justify"] = "center"
@@ -42,7 +43,6 @@ class LogInPage:
         username_label.place(x=180, y=120, width=70, height=25)
 
         password_label = tk.Label(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=9)
         password_label["font"] = ft
         password_label["fg"] = "#333333"
         password_label["justify"] = "center"
@@ -50,7 +50,7 @@ class LogInPage:
         password_label.place(x=180, y=170, width=70, height=25)
 
         username_entry = tk.Entry(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=9)
+        ft = tk_font.Font(family='Readex Pro', size=9)
         username_entry["font"] = ft
         username_entry["fg"] = "#333333"
         username_entry["justify"] = "left"
@@ -58,7 +58,7 @@ class LogInPage:
         username_entry.place(x=280, y=120, width=217, height=25)
 
         password_entry = tk.Entry(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=9)
+        ft = tk_font.Font(family='Readex Pro', size=9)
         password_entry["font"] = ft
         password_entry["fg"] = "#333333"
         password_entry["justify"] = "left"
@@ -66,7 +66,7 @@ class LogInPage:
         password_entry.place(x=280, y=170, width=217, height=25)
 
         login_button = tk.Button(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=9)
+        ft = tk_font.Font(family='Readex Pro', size=9)
         login_button["font"] = ft
         login_button["fg"] = "#000000"
         login_button["justify"] = "center"
@@ -75,7 +75,7 @@ class LogInPage:
         login_button["command"] = lambda: self.log_in(username_entry.get(), password_entry.get())
 
         register_label = tk.Label(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=9)
+        ft = tk_font.Font(family='Readex Pro', size=9)
         register_label["font"] = ft
         register_label["fg"] = "#333333"
         register_label["justify"] = "center"
@@ -83,7 +83,7 @@ class LogInPage:
         register_label.place(x=190, y=280, width=159, height=30)
 
         register_button = tk.Button(self.root)
-        ft = tkFont.Font(family='Readex Pro', size=9)
+        ft = tk_font.Font(family='Readex Pro', size=9)
         register_button["font"] = ft
         register_button["fg"] = "#000000"
         register_button["bg"] = "#dc98ea"
@@ -93,12 +93,12 @@ class LogInPage:
         register_button["command"] = self.register
 
 
-    def log_in(self, username, password):
+    def log_in(self, username: str, password: str) -> None:
         auth = self.client.log_in(username, password)
 
         if "Invalid" in auth[0]:
             inv_log_in_label = tk.Label(self.root)
-            ft = tkFont.Font(family='Readex Pro', size=10)
+            ft = tk_font.Font(family='Readex Pro', size=10)
             inv_log_in_label["font"] = ft
             inv_log_in_label["fg"] = "#f92f2f"
             inv_log_in_label["justify"] = "center"
@@ -113,7 +113,7 @@ class LogInPage:
             main_root.mainloop()
 
 
-    def register(self):
+    def register(self) -> None:
         self.root.destroy()
 
         reg_root = tk.Tk()

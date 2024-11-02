@@ -1,13 +1,14 @@
 import socket
 import threading
+import pickle
 
-from Database import DB
+from Backend.Database import DB
 import os
 
 
 class Server:
     def __init__(self):
-        self.PORT = 5050
+        self.PORT = 5071
         self.SERVER_IP = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER_IP, self.PORT)
         self.FORMAT = 'utf-8'
@@ -46,16 +47,8 @@ class Server:
             if client_request == "!LOG IN":
                 self.authentication(user)
                 if self.auth:
-                    user_files = ""
-                    for a_file in os.listdir(f"server_folder/{user.username}"):
-                        user_files += a_file + " "
-
-                    if user_files == "":
-                        user_files = "None"
-                    elif user_files[-1] == " ":
-                        user_files = user_files[:-1]
-
-                    user.conn.send(user_files.encode(self.FORMAT))
+                    user_files = os.listdir(f"server_folder/{user.username}")
+                    user.conn.send(pickle.dumps(user_files))
 
             elif client_request == "!SIGN UP":
 

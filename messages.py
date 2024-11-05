@@ -7,3 +7,4 @@ class MessageAPI(enum.StrEnum):
     DOWNLOAD_MESSAGE = "!DOWNLOAD"
     UPLOAD_MESSAGE = "!UPLOAD"
     LOG_IN_SUCCESSFUL_REPLY = "Authentication successful."
+    LOG_IN_FAILED_REPLY = "Authentication failed."

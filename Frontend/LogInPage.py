@@ -4,6 +4,7 @@ import tkinter.font as tk_font
 from Client import Client
 from RegisterPage import RegisterPage
 from MainPage import MainPage
+from messages import MessageAPI
 
 
 class LogInPage:
@@ -57,7 +58,7 @@ class LogInPage:
         username_entry["text"] = "Username:"
         username_entry.place(x=280, y=120, width=217, height=25)
 
-        password_entry = tk.Entry(self.root)
+        password_entry = tk.Entry(self.root, show="*")
         ft = tk_font.Font(family='Readex Pro', size=9)
         password_entry["font"] = ft
         password_entry["fg"] = "#333333"
@@ -94,9 +95,9 @@ class LogInPage:
 
 
     def log_in(self, username: str, password: str) -> None:
-        auth = self.client.log_in(username, password)
+        reply, files = self.client.log_in(username, password)
 
-        if "Invalid" in auth[0]:
+        if reply == MessageAPI.LOG_IN_FAILED_REPLY:
             inv_log_in_label = tk.Label(self.root)
             ft = tk_font.Font(family='Readex Pro', size=10)
             inv_log_in_label["font"] = ft
@@ -109,7 +110,7 @@ class LogInPage:
             self.root.destroy()
 
             main_root = tk.Tk()
-            main_app = MainPage(main_root, self.client, auth[1])
+            main_app = MainPage(main_root, self.client, files)
             main_root.mainloop()
 
 

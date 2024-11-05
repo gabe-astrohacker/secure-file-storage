@@ -9,8 +9,8 @@ from messages import MessageAPI
 
 class Client:
     def __init__(self):
-        self.PORT = 5071
-        self.SERVER = "146.179.86.135"
+        self.PORT = 5050
+        self.SERVER = "172.26.219.174"
         self.ADDR = (self.SERVER, self.PORT)
         self.FORMAT = 'utf-8'
         self.NO_FILES_REPLY = "None"
@@ -21,7 +21,7 @@ class Client:
         self.client.connect(self.ADDR)
 
 
-    def log_in(self, username, password):
+    def log_in(self, username: str, password: str) -> tuple[str, list[str]]:
         self.send(MessageAPI.LOG_IN_MESSAGE)
         reply = self.send(f"{username}, {password}")
 
@@ -32,24 +32,15 @@ class Client:
         return reply, self.my_files
 
 
-    def sign_up(self, username, password):
+    def sign_up(self, username: str, password: str) -> str:
         self.send(MessageAPI.SIGN_UP_MESSAGE)
         self.my_files = ""
 
         return self.send(f"{username}, {password}")
 
 
-    def download(self, file):
+    def download(self, file: str) -> None:
         self.send(MessageAPI.DOWNLOAD_MESSAGE)
-
-        while len(file) < 4 or file[-4] != ".":
-            print("Error. Invalid extension.")
-
-        while file not in self.my_files:
-            print("Error. File not found.")
-
-            while len(file) < 4 or file[-4] != ".":
-                print("Error. Invalid extension.")
 
         key_file = tempfile.NamedTemporaryFile(delete=False)
 
@@ -75,7 +66,7 @@ class Client:
         os.unlink(key_file.name)
 
 
-    def upload(self, plain_file):
+    def upload(self, plain_file: str) -> str:
         self.send(MessageAPI.UPLOAD_MESSAGE)
 
         plain_file = plain_file.split("/")[-1]
@@ -106,13 +97,13 @@ class Client:
         return plain_file
 
 
-    def send(self, message):
+    def send(self, message: str) -> str:
         self.client.send(message.encode(self.FORMAT))
         return self.client.recv(1024).decode(self.FORMAT)
 
 
     @staticmethod
-    def file_exists(address):
+    def file_exists(address: str) -> bool:
         return os.path.exists(address) and os.path.isfile(address) and os.stat(address).st_size > 0
 
 

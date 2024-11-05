@@ -9,11 +9,10 @@ from messages import MessageAPI
 
 class Server:
     def __init__(self):
-        self.PORT = 5071
+        self.PORT = 5050
         self.SERVER_IP = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER_IP, self.PORT)
         self.FORMAT = 'utf-8'
-        self.auth = False
         self.db = DB()
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,16 +28,15 @@ class Server:
             thread.start()
             print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
-
     class User:
         def __init__(self, conn, addr):
             self.conn = conn
             self.addr = addr
+            self.auth = False
             self.username = ""
             self.password = ""
 
-
-    def handle_client(self, conn, addr):
+    def handle_client(self, conn: socket, addr) -> None:
         print(f"[NEW CONNECTION] {addr} is requesting to connect.\n")
 
         user = self.User(conn, addr)
@@ -50,13 +48,12 @@ class Server:
                     self.create_account(user)
 
                 case MessageAPI.LOG_IN_MESSAGE:
-                    self.authentication(user)
-                    if self.auth:
+                    if self.authentication(user):
                         user_files = os.listdir(f"server_folder/{user.username}")
                         user.conn.send(pickle.dumps(user_files))
 
                 case MessageAPI.UPLOAD_MESSAGE | MessageAPI.DOWNLOAD_MESSAGE:
-                    if not self.auth:
+                    if not user.auth:
                         user.conn.send("Error. User not authenticated.".encode(self.FORMAT))
                         user.conn.close()
 
@@ -72,26 +69,23 @@ class Server:
         user.conn.send("Goodbye.".encode(self.FORMAT))
         user.conn.close()
 
-
-    def receive(self, user, msg="Message Received."):
+    def receive(self, user: User, msg="Message Received.") -> str:
         request = user.conn.recv(2048).decode(self.FORMAT)
         print(f"[{user.addr}] {request}")
         user.conn.send(msg.encode(self.FORMAT))
         return request
 
-
-    def authentication(self, user):
+    def authentication(self, user: User) -> None:
         user.username, user.password = self.receive(user, msg="").split(", ")
 
-        self.auth = self.db.check_user(user.username, user.password)
+        auth = self.db.check_user(user.username, user.password)
+        user.auth = auth
 
-        if self.auth:
-            user.conn.send("Authentication successful.".encode(self.FORMAT))
-        else:
-            user.conn.send("Invalid username or password.".encode(self.FORMAT))
+        reply = MessageAPI.LOG_IN_SUCCESSFUL_REPLY if auth else MessageAPI.LOG_IN_FAILED_REPLY
+        user.conn.send(reply.encode(self.FORMAT))
+        return auth
 
-
-    def create_account(self, user):
+    def create_account(self, user: User) -> None:
         user.username, user.password = self.receive(user, msg="").split(", ")
 
         sign_up = self.db.new_user(user.username, user.password)
@@ -102,8 +96,7 @@ class Server:
         else:
             user.conn.send("Username already in use. Try again.".encode(self.FORMAT))
 
-
-    def upload(self, user):
+    def upload(self, user: User) -> None:
         file_name = self.receive(user)
         file_data = user.conn.recv(131072)
         key_data = user.conn.recv(131072)
@@ -113,8 +106,7 @@ class Server:
         with open(f"server_folder/{user.username}/{file_name}", "wb") as file:
             file.write(file_data)
 
-
-    def download(self, user):
+    def download(self, user: User) -> None:
         file_name = self.receive(user, msg="")
 
         with open(f"server_folder/{user.username}/{file_name}", "rb") as file:

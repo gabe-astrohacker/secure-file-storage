@@ -44,6 +44,13 @@ class MainPage:
         file_box["justify"] = "left"
         file_box.place(x=170, y=180, width=411, height=len(self.files) * 22.5)
 
+        file_status_label = tk.Label(self.root)
+        ft = tk_font.Font(family='Readex Pro', size=8)
+        file_status_label["font"] = ft
+        file_status_label["justify"] = "left"
+        file_status_label["fg"] = "#0000FF"
+        file_status_label.place(x=60, y=(len(self.files) * 22.5 + 180), width=400, height=25)
+
         download_button = tk.Button(self.root)
         download_button["text"] = "Download"
         download_button["bg"] = "#3cbff7"
@@ -52,7 +59,7 @@ class MainPage:
         download_button["fg"] = "#000000"
         download_button["justify"] = "center"
         download_button.place(x=170, y=130, width=88, height=25)
-        download_button["command"] = lambda: self.download(file_box.curselection())
+        download_button["command"] = lambda: self.download(file_box.curselection(), file_status_label)
 
         if self.files == self.NO_FILES:
             download_button["state"] = "disabled"
@@ -65,15 +72,10 @@ class MainPage:
         upload_button["fg"] = "#000000"
         upload_button["justify"] = "center"
         upload_button.place(x=490, y=130, width=88, height=25)
-        upload_button["command"] = self.upload
+        upload_button["command"] = lambda: self.upload(file_status_label)
 
-    def download(self, selection: tuple):
-        file_status_label = tk.Label(self.root)
-        ft = tk_font.Font(family='Readex Pro', size=8)
-        file_status_label["font"] = ft
-        file_status_label["justify"] = "left"
-        file_status_label["fg"] = "#0000FF"
-        file_status_label.place(x=60, y=(len(self.files) * 22.5 + 180), width=400, height=25)
+
+    def download(self, selection: tuple, file_status_label: tk.Label):
 
         if selection == ():
             file_status_label["text"] = "Please click on a file to download it"
@@ -84,16 +86,19 @@ class MainPage:
 
             file_status_label["text"] = f"{file} has been downloaded"
 
-    def upload(self) -> None:
+    def upload(self, file_status_label: tk.Label) -> None:
         filename = filedialog.askopenfilename()
 
         if filename:
-            file_addr = self.client.upload(filename)
+            if "." not in filename:
+                file_status_label["text"] = f"file requires extension"
+            else:
+                file_addr = self.client.upload(filename)
 
-            if self.files == self.NO_FILES:
-                self.files = []
+                if self.files == self.NO_FILES:
+                    self.files = []
 
-            self.files.append(file_addr)
+                self.files.append(file_addr)
 
         self.gui()
 

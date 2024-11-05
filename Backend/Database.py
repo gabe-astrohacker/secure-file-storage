@@ -1,6 +1,6 @@
 import mariadb
 import sys
-import math
+
 
 class DB:
     def __init__(self):
@@ -63,8 +63,6 @@ class DB:
         else:
             print("User created successfully")
             return True
-        finally:
-            self.conn.close()
 
 
     def new_file(self, user, file_name, key):
@@ -78,8 +76,6 @@ class DB:
             return False
         else:
             return True
-        finally:
-            self.conn.close()
 
 
     def check_user(self, user, password):
@@ -90,8 +86,6 @@ class DB:
 
         except mariadb.Error as e:
             print(f"Error when querying MariaDB: {e}")
-        finally:
-            self.conn.close()
 
         return (1,) in self.cursor
 
@@ -104,8 +98,6 @@ class DB:
         except mariadb.Error as e:
             print(f"Error when querying MariaDB: {e}")
             return False
-        finally:
-            self.conn.close()
 
         for key in self.cursor:
             return key[0]

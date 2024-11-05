@@ -1,9 +1,10 @@
 import socket
 import threading
 import pickle
+import os
 
 from Backend.Database import DB
-import os
+from messages import MessageAPI
 
 
 class Server:
@@ -12,8 +13,8 @@ class Server:
         self.SERVER_IP = socket.gethostbyname(socket.gethostname())
         self.ADDR = (self.SERVER_IP, self.PORT)
         self.FORMAT = 'utf-8'
-        self.DISCONNECT_MESSAGE = '!DISCONNECT'
         self.auth = False
+        self.db = DB()
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind(self.ADDR)
@@ -43,25 +44,27 @@ class Server:
         user = self.User(conn, addr)
         client_request = self.receive(user)
 
-        while client_request != self.DISCONNECT_MESSAGE:
-            if client_request == "!LOG IN":
-                self.authentication(user)
-                if self.auth:
-                    user_files = os.listdir(f"server_folder/{user.username}")
-                    user.conn.send(pickle.dumps(user_files))
+        while client_request != MessageAPI.DISCONNECT_MESSAGE:
+            match client_request:
+                case MessageAPI.SIGN_UP_MESSAGE:
+                    self.create_account(user)
 
-            elif client_request == "!SIGN UP":
+                case MessageAPI.LOG_IN_MESSAGE:
+                    self.authentication(user)
+                    if self.auth:
+                        user_files = os.listdir(f"server_folder/{user.username}")
+                        user.conn.send(pickle.dumps(user_files))
 
-                self.create_account(user)
+                case MessageAPI.UPLOAD_MESSAGE | MessageAPI.DOWNLOAD_MESSAGE:
+                    if not self.auth:
+                        user.conn.send("Error. User not authenticated.".encode(self.FORMAT))
+                        user.conn.close()
 
-            elif self.auth:
-                if client_request == "!UPLOAD":
-                    self.upload(user)
-
-                elif client_request == "!DOWNLOAD":
-                    self.download(user)
-
-                else:
+                    if client_request == MessageAPI.UPLOAD_MESSAGE:
+                        self.upload(user)
+                    else:
+                        self.download(user)
+                case _:
                     user.conn.send("Error. Invalid request.".encode(self.FORMAT))
 
             client_request = self.receive(user)
@@ -80,8 +83,7 @@ class Server:
     def authentication(self, user):
         user.username, user.password = self.receive(user, msg="").split(", ")
 
-        db = DB()
-        self.auth = db.check_user(user.username, user.password)
+        self.auth = self.db.check_user(user.username, user.password)
 
         if self.auth:
             user.conn.send("Authentication successful.".encode(self.FORMAT))
@@ -92,8 +94,7 @@ class Server:
     def create_account(self, user):
         user.username, user.password = self.receive(user, msg="").split(", ")
 
-        db = DB()
-        sign_up = db.new_user(user.username, user.password)
+        sign_up = self.db.new_user(user.username, user.password)
 
         if sign_up:
             user.conn.send("User created successfully".encode(self.FORMAT))
@@ -107,10 +108,7 @@ class Server:
         file_data = user.conn.recv(131072)
         key_data = user.conn.recv(131072)
 
-        user.conn.send("Msg received".encode(self.FORMAT))
-
-        db = DB()
-        db.new_file(user.username, file_name, key_data)
+        self.db.new_file(user.username, file_name, key_data)
 
         with open(f"server_folder/{user.username}/{file_name}", "wb") as file:
             file.write(file_data)
@@ -122,8 +120,7 @@ class Server:
         with open(f"server_folder/{user.username}/{file_name}", "rb") as file:
             data = file.read()
 
-        db = DB()
-        key = db.get_key(user.username, file_name)
+        key = self.db.get_key(user.username, file_name)
         user.conn.send(data)
         user.conn.send(key)
 
